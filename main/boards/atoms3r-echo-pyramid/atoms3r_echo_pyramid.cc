@@ -8,8 +8,6 @@
    - Clock Generator Si5351@0x60
    - ES8311@0x30
    - ES7210@0x80
-* i2c bus internal(atoms3r):
-   - Backlight Controller LP5562@0x30
 
 ***************************************************************************/
 #include "board.h"
@@ -37,53 +35,13 @@
 #include <esp_random.h>
 
 
-#define TAG "AtomS3R+EchoPyramid"
+#define TAG "AtomS3+EchoPyramid"
 
 
 LV_IMAGE_DECLARE(click);
 LV_IMAGE_DECLARE(ec_left);
 LV_IMAGE_DECLARE(ec_right);
 LV_FONT_DECLARE(BUILTIN_TEXT_FONT);
-
-/**
- * LP5562 Backlight Controller
- * I2C Address: 0x30
- */
-class Lp5562 : public I2cDevice {
-public:
-    Lp5562(i2c_master_bus_handle_t i2c_bus, uint8_t addr) : I2cDevice(i2c_bus, addr) {
-        WriteReg(0x00, 0B01000000); // Set chip_en to 1
-        WriteReg(0x08, 0B00000001); // Enable internal clock
-        WriteReg(0x70, 0B00000000); // Configure all LED outputs to be controlled from I2C registers
-
-        // PWM clock frequency 558 Hz
-        auto data = ReadReg(0x08);
-        data = data | 0B01000000;
-        WriteReg(0x08, data);
-    }
-
-    void SetBrightness(uint8_t brightness) {
-        // Map 0~100 to 0~255
-        brightness = brightness * 255 / 100;
-        WriteReg(0x0E, brightness);
-    }
-};
-
-class CustomBacklight : public Backlight {
-public:
-    CustomBacklight(Lp5562* lp5562) : lp5562_(lp5562) {}
-
-    void SetBrightnessImpl(uint8_t brightness) override {
-        if (lp5562_) {
-            lp5562_->SetBrightness(brightness);
-        } else {
-            ESP_LOGE(TAG, "LP5562 not available");
-        }
-    }
-
-private:
-    Lp5562* lp5562_ = nullptr;
-};
 
 static const gc9a01_lcd_init_cmd_t gc9107_lcd_init_cmds[] = {
     //  {cmd, { data }, data_size, delay_ms}
@@ -114,14 +72,12 @@ static const gc9a01_lcd_init_cmd_t gc9107_lcd_init_cmds[] = {
     14, 0},
 };
 
-class AtomS3rEchoPyramidBoard : public WifiBoard {
+class AtomS3EchoPyramidBoard : public WifiBoard {
 private:
     i2c_master_bus_handle_t i2c_bus_external_;
-    i2c_master_bus_handle_t i2c_bus_internal_;
     EchoPyramid* echo_pyramid_ = nullptr;
     Si5351* si5351_ = nullptr;
     Aw87559* aw87559_ = nullptr;
-    Lp5562* lp5562_ = nullptr;
     Display* display_ = nullptr;
     Button boot_button_;
     bool is_echo_pyramid_connected_ = false;
@@ -145,11 +101,6 @@ private:
             },
         };
         ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_bus_cfg, &i2c_bus_external_));
-        
-        i2c_bus_cfg.i2c_port = I2C_NUM_0;
-        i2c_bus_cfg.sda_io_num = GPIO_NUM_45;
-        i2c_bus_cfg.scl_io_num = GPIO_NUM_0;
-        ESP_ERROR_CHECK(i2c_new_master_bus(&i2c_bus_cfg, &i2c_bus_internal_));
     }
 
     void I2cDetect(i2c_master_bus_handle_t i2c_bus) {
@@ -196,11 +147,6 @@ private:
         }
     }
 
-    void InitializeLp5562() {
-        ESP_LOGI(TAG, "Init LED Driver LP5562");
-        lp5562_ = new Lp5562(i2c_bus_internal_, LED_DRIVER_LP5562_ADDR);
-    }
-
     void InitializeEchoPyramid() {
         ESP_LOGI(TAG, "Init Echo Pyramid");
         echo_pyramid_ = new EchoPyramid(i2c_bus_external_, ECHO_PYRAMID_DEVICE_ADDR);
@@ -217,7 +163,7 @@ private:
         spi_bus_config_t buscfg = {};
         buscfg.mosi_io_num = GPIO_NUM_21;
         buscfg.miso_io_num = GPIO_NUM_NC;
-        buscfg.sclk_io_num = GPIO_NUM_15;
+        buscfg.sclk_io_num = GPIO_NUM_17;
         buscfg.quadwp_io_num = GPIO_NUM_NC;
         buscfg.quadhd_io_num = GPIO_NUM_NC;
         buscfg.max_transfer_sz = DISPLAY_WIDTH * DISPLAY_HEIGHT * sizeof(uint16_t);
@@ -230,15 +176,15 @@ private:
         ESP_LOGI(TAG, "Install panel IO");
         esp_lcd_panel_io_handle_t io_handle = NULL;
         esp_lcd_panel_io_spi_config_t io_config = {};
-        io_config.cs_gpio_num = GPIO_NUM_14;
-        io_config.dc_gpio_num = GPIO_NUM_42;
+        io_config.cs_gpio_num = GPIO_NUM_15;
+        io_config.dc_gpio_num = GPIO_NUM_33;
         io_config.spi_mode = 0;
         io_config.pclk_hz = 40 * 1000 * 1000;
         io_config.trans_queue_depth = 10;
         io_config.lcd_cmd_bits = 8;
         io_config.lcd_param_bits = 8;
         ESP_ERROR_CHECK(esp_lcd_new_panel_io_spi(SPI3_HOST, &io_config, &io_handle));
-    
+
         ESP_LOGI(TAG, "Install GC9A01 panel driver");
         esp_lcd_panel_handle_t panel_handle = NULL;
         gc9a01_vendor_config_t gc9107_vendor_config = {
@@ -246,22 +192,18 @@ private:
             .init_cmds_size = sizeof(gc9107_lcd_init_cmds) / sizeof(gc9a01_lcd_init_cmd_t),
         };
         esp_lcd_panel_dev_config_t panel_config = {};
-        panel_config.reset_gpio_num = GPIO_NUM_48;
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(6, 0, 0)
-        panel_config.rgb_ele_order = LCD_RGB_ELEMENT_ORDER_BGR;
-#else
+        panel_config.reset_gpio_num = GPIO_NUM_34;
         panel_config.rgb_endian = LCD_RGB_ENDIAN_BGR;
-#endif
         panel_config.bits_per_pixel = 16;
         panel_config.vendor_config = &gc9107_vendor_config;
 
         ESP_ERROR_CHECK(esp_lcd_new_panel_gc9a01(io_handle, &panel_config, &panel_handle));
         ESP_ERROR_CHECK(esp_lcd_panel_reset(panel_handle));
         ESP_ERROR_CHECK(esp_lcd_panel_init(panel_handle));
-        ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true)); 
+        ESP_ERROR_CHECK(esp_lcd_panel_disp_on_off(panel_handle, true));
 
         display_ = new SpiLcdDisplay(io_handle, panel_handle,
-            DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_OFFSET_X, DISPLAY_OFFSET_Y, 
+            DISPLAY_WIDTH, DISPLAY_HEIGHT, DISPLAY_OFFSET_X, DISPLAY_OFFSET_Y,
             DISPLAY_MIRROR_X, DISPLAY_MIRROR_Y, DISPLAY_SWAP_XY);
     }
     
@@ -455,10 +397,9 @@ private:
     }
 
 public:
-    AtomS3rEchoPyramidBoard() : boot_button_(BOOT_BUTTON_GPIO) {
+        AtomS3EchoPyramidBoard() : boot_button_(BOOT_BUTTON_GPIO) {
         InitializeI2c();
         I2cDetect(i2c_bus_external_);
-        InitializeLp5562();
         InitializeSpi();
         InitializeGc9107Display();
         CheckEchoPyramidConnection();
@@ -492,10 +433,10 @@ public:
         return display_;
     }
 
-    virtual Backlight *GetBacklight() override {
-        static CustomBacklight backlight(lp5562_);
+    virtual Backlight* GetBacklight() override {
+        static PwmBacklight backlight(DISPLAY_BACKLIGHT_PIN, DISPLAY_BACKLIGHT_OUTPUT_INVERT, 256);
         return &backlight;
     }
 };
 
-DECLARE_BOARD(AtomS3rEchoPyramidBoard);
+DECLARE_BOARD(AtomS3EchoPyramidBoard);

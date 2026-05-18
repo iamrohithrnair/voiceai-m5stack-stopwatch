@@ -342,7 +342,8 @@ public:
             AUDIO_CODEC_GPIO_PA, 
             AUDIO_CODEC_ES8311_ADDR, 
             AUDIO_CODEC_ES7210_ADDR, 
-            AUDIO_INPUT_REFERENCE);
+            AUDIO_INPUT_REFERENCE,
+            AUDIO_INPUT_REFERENCE_CHANNEL);
         return &audio_codec;
     }
 

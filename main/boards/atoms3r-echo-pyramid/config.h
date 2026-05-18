@@ -43,8 +43,8 @@
 #define DISPLAY_SWAP_XY                 false
 #define DISPLAY_OFFSET_X                0
 #define DISPLAY_OFFSET_Y                0
-#define DISPLAY_BACKLIGHT_PIN           GPIO_NUM_NC
-#define DISPLAY_BACKLIGHT_OUTPUT_INVERT true
+#define DISPLAY_BACKLIGHT_PIN           GPIO_NUM_16
+#define DISPLAY_BACKLIGHT_OUTPUT_INVERT false
 
 
 #endif

@@ -1,16 +1,17 @@
-# AtomS3R + EchoPyramid
+# AtomS3 + EchoPyramid
+
+> **Note:** AtomS3 无 PSRAM，不支持语音唤醒，可通过按压屏幕或按键唤醒。
 
 ----------
 ## 快速体验
 
 下载、安装 [M5Burner](https://docs.m5stack.com/zh_CN/uiflow/m5burner/intro) ，打开 M5Burner 搜索 EchoPyramid 下载小智固件，烧录。
 
-
 ----------
 ## 发布固件
 
 ```shell
-python scripts/release.py atoms3r-echo-pyramid
+python scripts/release.py atoms3-echo-pyramid
 ```
 
 生成的固件在 releases 目录下
@@ -33,7 +34,7 @@ idf.py menuconfig
 **选择板子**
 
 ```
-Xiaozhi Assistant -> Board Type -> AtomS3R + Echo Pyramid
+Xiaozhi Assistant -> Board Type -> AtomS3 + Echo Pyramid
 ```
 
 **修改 flash 大小**
@@ -46,12 +47,6 @@ Serial flasher config -> Flash size -> 8 MB
 
 ```
 Partition Table -> Custom partition CSV file -> partitions/v2/8m.csv
-```
-
-**修改 psram 配置**
-
-```
-Component config -> ESP PSRAM -> SPI RAM config -> Mode (QUAD/OCT) -> Octal Mode PSRAM
 ```
 
 **编译烧录固件**

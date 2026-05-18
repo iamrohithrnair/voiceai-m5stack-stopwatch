@@ -15,6 +15,7 @@
 
 // Audio Codec I2C (SYS_I2C/I2C1)
 #define AUDIO_INPUT_REFERENCE       true
+#define AUDIO_INPUT_REFERENCE_CHANNEL 2 // MIC3 AEC
 #define AUDIO_CODEC_I2C_SDA_PIN     GPIO_NUM_11
 #define AUDIO_CODEC_I2C_SCL_PIN     GPIO_NUM_9
 #define AUDIO_CODEC_ES8311_ADDR     ES8311_CODEC_DEFAULT_ADDR
@@ -45,7 +46,7 @@
 #define DISPLAY_OFFSET_X        0
 #define DISPLAY_OFFSET_Y        0
 #define DISPLAY_MIRROR_X        false
-#define DISPLAY_MIRROR_Y        false
+#define DISPLAY_MIRROR_Y        true
 #define DISPLAY_SWAP_XY         false
 
 #define DISPLAY_MIPI_LANE_NUM          2

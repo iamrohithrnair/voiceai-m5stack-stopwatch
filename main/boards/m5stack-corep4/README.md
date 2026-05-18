@@ -74,7 +74,7 @@ idf.py menuconfig
 
 ```shell
 esptool.py --chip esp32p4 merge_bin \
-    -o M5Stack-CoreP4-xiaozhi-v2.2.3-20260415_0x00.bin \
+    -o M5Stack-CoreP4-xiaozhi-v2.2.3-V2-20260507_0x00.bin \
     --flash_mode dio --flash_freq 80m --flash_size 16MB \
     0x2000 build/bootloader/bootloader.bin \
     0x20000 build/xiaozhi.bin \

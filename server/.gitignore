@@ -1,0 +1,8 @@
+xiaozhi-esp32-server/
+data/.config.yaml
+data/*
+!data/.config.yaml.example
+models/
+mysql/
+uploadfile/
+tmp/

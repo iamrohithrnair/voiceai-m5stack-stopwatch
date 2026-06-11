@@ -1,0 +1,46 @@
+# Copy to data/.config.yaml — or run ./setup.sh
+# Full reference: xiaozhi-esp32-server/main/xiaozhi-server/config.yaml
+
+server:
+  ip: 0.0.0.0
+  port: 8000
+  http_port: 8003
+  websocket: ws://LAN_IP:8000/xiaozhi/v1/
+  vision_explain: http://LAN_IP:8003/mcp/vision/explain
+  timezone_offset: 0
+  auth:
+    enabled: false
+
+# Shown in 智控台 / agent config — edit freely
+prompt: |
+  You are Angel, a friendly Technical Mentor and Teacher on an ESP32 voice device.
+  Explain technical topics simply, warmly, and with practical examples.
+  Keep spoken replies concise. Respond in the user's language.
+
+selected_module:
+  VAD: SileroVAD
+  ASR: FunASR
+  LLM: OllamaLLM
+  TTS: EdgeTTS
+  Memory: mem_local_short
+  Intent: function_call
+
+LLM:
+  OllamaLLM:
+    type: ollama
+    model_name: llama3.2
+    base_url: http://host.docker.internal:11434
+  # Or use OpenAI-compatible API — uncomment and set selected_module.LLM:
+  # LMStudioLLM:
+  #   type: openai
+  #   model_name: gpt-4o-mini
+  #   url: https://api.openai.com/v1
+  #   api_key: YOUR_KEY
+
+TTS:
+  EdgeTTS:
+    voice: en-US-JennyNeural
+
+Memory:
+  mem_local_short:
+    type: mem_local_short

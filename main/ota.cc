@@ -46,7 +46,7 @@ Ota::~Ota() {
 std::string Ota::GetCheckVersionUrl() {
 #if CONFIG_USE_LOCAL_SERVER
     char url[160];
-    snprintf(url, sizeof(url), "http://%s:%d/xiaozhi/ota/", CONFIG_LOCAL_SERVER_HOST, CONFIG_LOCAL_SERVER_PORT);
+    snprintf(url, sizeof(url), "http://%s:%d/xiaozhi/ota/", CONFIG_LOCAL_SERVER_HOST, CONFIG_LOCAL_SERVER_OTA_PORT);
     return url;
 #else
     Settings settings("wifi", false);
@@ -61,7 +61,7 @@ std::string Ota::GetCheckVersionUrl() {
 void Ota::ApplyLocalServerConfig() {
 #if CONFIG_USE_LOCAL_SERVER
     char ws_url[160];
-    snprintf(ws_url, sizeof(ws_url), "ws://%s:%d/xiaozhi/v1/", CONFIG_LOCAL_SERVER_HOST, CONFIG_LOCAL_SERVER_PORT);
+    snprintf(ws_url, sizeof(ws_url), "ws://%s:%d/xiaozhi/v1/", CONFIG_LOCAL_SERVER_HOST, CONFIG_LOCAL_SERVER_WS_PORT);
 
     Settings settings("websocket", true);
     settings.SetString("url", ws_url);

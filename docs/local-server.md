@@ -1,61 +1,64 @@
 # Local Server Setup
 
-This fork runs entirely on your own network. The ESP32 firmware talks to `server/app.py` on your computer instead of the xiaozhi.me cloud.
+This project uses **[xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server)** — the same backend as xiaozhi.me, with the full **智控台** web UI for agent configuration, memory, voice clone, knowledge base, and MCP.
 
 ## Architecture
 
 ```
-ESP32  ──Wi-Fi──►  your PC (server/app.py)
-                      ├── OTA  /xiaozhi/ota/     → websocket URL, no activation
-                      └── WS   /xiaozhi/v1/      → ASR → LLM → TTS
+ESP32 firmware  ──Wi-Fi──►  xiaozhi-esp32-server (Docker)
+                              ├── :8003  OTA config
+                              ├── :8000  WebSocket voice
+                              └── :8002  智控台 web UI (full stack)
 ```
 
-## Firmware configuration
+## 1. Start the backend
+
+```bash
+cd server
+./setup.sh          # clone upstream, create config, download ASR model
+./start.sh --full   # Docker: voice + web console + database
+```
+
+Open **http://\<your-lan-ip\>:8002** — this is the xiaozhi.me-equivalent console.
+
+## 2. Flash firmware
 
 In `idf.py menuconfig` → **Xiaozhi Assistant**:
 
-| Option | Description |
-|--------|-------------|
-| **Use self-hosted local server** | Enabled by default |
-| **Local server hostname or IP** | Your computer's LAN address (e.g. `192.168.1.42`) |
-| **Local server port** | Default `8000` |
+| Setting | Value |
+|---------|-------|
+| Use self-hosted local server | Enabled |
+| Local server hostname or IP | Your PC's LAN IP |
+| WebSocket port | `8000` |
+| OTA HTTP port | `8003` |
 
-These values are baked into `sdkconfig.defaults`. Rebuild and flash after changing them.
+Build and flash. No xiaozhi.me activation code required.
 
-To use the official cloud again, disable **Use self-hosted local server** and set **Default OTA URL** back to `https://api.tenclass.net/xiaozhi/ota/`.
+## 3. Configure your agent (智控台)
 
-## Server setup
+In the web UI at `:8002`, configure the same fields as xiaozhi.me:
 
-See [server/README.md](../server/README.md) for install steps.
+- **Configure Role** — template, assistant name (e.g. Angel), role introduction
+- **Dialogue language** & **voice role**
+- **Memory type** — session, rolling summary (`mem_local_short`), mem0, etc.
+- **LLM / ASR / TTS** modules
+- **MCP**, knowledge base, voice clone
 
-### Local configuration UI
+Edit `server/xiaozhi-esp32-server/main/xiaozhi-server/data/.config.yaml` for low-level module config, or use the web UI after full-stack deploy.
 
-With the server running, open:
+## Ports
 
-```
-http://<your-computer-ip>:8000/console/
-```
-
-This replaces the xiaozhi.me web panel. You can edit:
-
-| Setting | What it controls |
-|---------|------------------|
-| Role template | Presets including Technical Mentor (Angel) |
-| Assistant name | How the bot refers to itself |
-| Role introduction | System prompt / personality |
-| Dialogue language | Response language |
-| Voice role | TTS voice |
-| Memory type | None, session turns, or rolling summary |
-| LLM model / API | Chat model (OpenAI, Ollama, etc.) |
-| Speech speed & pitch | TTS tuning |
-| MCP / Knowledge base | Saved for device MCP; RAG URL for future use |
-
-**Not in local server yet:** voice clone, per-speaker voice-print memory, cloud MCP marketplace. Use [xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server) for full parity.
-
-Changes apply when the device opens a new voice session.
+| Port | Service |
+|------|---------|
+| 8002 | 智控台 (configuration UI) |
+| 8003 | OTA (`/xiaozhi/ota/`) |
+| 8000 | WebSocket (`/xiaozhi/v1/`) |
 
 ## Troubleshooting
 
-- **Device shows OTA errors but still works**: expected if the server was offline at boot; local WebSocket config is applied from firmware settings.
-- **No speech response**: check `OPENAI_API_KEY` (or Ollama is running), and that `ffmpeg` is installed.
-- **Wrong IP in OTA URL**: set `server.public_host` in `server/config.yaml` and `LOCAL_SERVER_HOST` in menuconfig to your machine's LAN IP.
+- **OTA fails**: confirm `http://<ip>:8003/xiaozhi/ota/` in a browser
+- **No voice**: check `docker logs -f xiaozhi-esp32-server`
+- **ASR errors**: ensure `models/SenseVoiceSmall/model.pt` exists (re-run `./setup.sh`)
+- **LLM errors**: set API keys in `.config.yaml` or switch to Ollama
+
+See [server/README.md](../server/README.md) and upstream [docs](https://github.com/xinnan-tech/xiaozhi-esp32-server/tree/main/docs).

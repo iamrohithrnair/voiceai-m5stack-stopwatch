@@ -108,7 +108,7 @@ Breadboard demo:
 
 For beginners, it is recommended to use the firmware that can be flashed without setting up a development environment.
 
-**This fork defaults to a self-hosted local server** — no [xiaozhi.me](https://xiaozhi.me) account required. See [Local Server Setup](docs/local-server.md) and [server/README.md](server/README.md) to run `server/app.py` on your PC and configure your own ASR/LLM/TTS models.
+**This fork defaults to a self-hosted local server** — no [xiaozhi.me](https://xiaozhi.me) account required. Run `cd server && ./setup.sh && ./start.sh --full` for the full [xiaozhi-esp32-server](https://github.com/xinnan-tech/xiaozhi-esp32-server) backend and **智控台** web UI at `http://<your-ip>:8002`. See [Local Server Setup](docs/local-server.md).
 
 To use the official cloud instead, disable **Use self-hosted local server** in `idf.py menuconfig`.
 
@@ -131,7 +131,7 @@ To use the official cloud instead, disable **Use self-hosted local server** in `
 
 ## Large Model Configuration
 
-Edit `server/config.yaml` to choose your ASR, LLM, and TTS providers (OpenAI, Ollama, Edge TTS, local Whisper, etc.). See [docs/local-server.md](docs/local-server.md).
+Use the **智控台** web UI at `http://<your-ip>:8002` (after `./start.sh --full`) or edit `server/xiaozhi-esp32-server/main/xiaozhi-server/data/.config.yaml`. See [docs/local-server.md](docs/local-server.md).
 
 For the official cloud console instead, log in at [xiaozhi.me](https://xiaozhi.me).
 

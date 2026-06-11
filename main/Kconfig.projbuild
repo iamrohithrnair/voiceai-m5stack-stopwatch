@@ -12,17 +12,26 @@ config LOCAL_SERVER_HOST
     default "192.168.1.100"
     depends on USE_LOCAL_SERVER
     help
-        IP address or hostname of the machine running server/app.py.
+        IP address or hostname of the machine running the local xiaozhi-esp32-server.
         Use your computer's LAN IP so the ESP32 can reach it.
 
-config LOCAL_SERVER_PORT
-    int "Local server port"
+config LOCAL_SERVER_WS_PORT
+    int "Local server WebSocket port"
     default 8000
     depends on USE_LOCAL_SERVER
+    help
+        WebSocket voice endpoint (xiaozhi-esp32-server default).
+
+config LOCAL_SERVER_OTA_PORT
+    int "Local server OTA HTTP port"
+    default 8003
+    depends on USE_LOCAL_SERVER
+    help
+        OTA config endpoint (xiaozhi-esp32-server http_port default).
 
 config OTA_URL
     string "Default OTA URL"
-    default "http://192.168.1.100:8000/xiaozhi/ota/" if USE_LOCAL_SERVER
+    default "http://192.168.1.100:8003/xiaozhi/ota/" if USE_LOCAL_SERVER
     default "https://api.tenclass.net/xiaozhi/ota/"
     help
         The application will access this URL to check for new firmwares and server address.

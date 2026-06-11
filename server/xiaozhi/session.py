@@ -8,6 +8,7 @@ from typing import Any
 from aiohttp import web
 
 from xiaozhi.audio import mp3_to_opus_packets, opus_packets_to_wav
+from xiaozhi.config_store import build_system_prompt
 from xiaozhi.providers import AsrProvider, LlmProvider, TtsProvider
 
 
@@ -29,12 +30,13 @@ class DeviceSession:
         self.listening = False
         self.processing = False
 
-        assistant = config.get("assistant", {})
-        system_prompt = assistant.get(
-            "system_prompt", "You are a helpful voice assistant."
-        )
         self.asr = AsrProvider(config.get("asr", {}))
-        self.llm = LlmProvider(config.get("llm", {}), system_prompt)
+        self.llm = LlmProvider(
+            config.get("llm", {}),
+            build_system_prompt(config, device_id),
+            config.get("memory", {}),
+            device_id,
+        )
         self.tts = TtsProvider(config.get("tts", {}))
 
     async def run(self) -> None:

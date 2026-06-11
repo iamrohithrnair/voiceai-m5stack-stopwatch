@@ -16,6 +16,7 @@ from aiohttp import web
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from xiaozhi.config import load_config, public_host, websocket_url
+from xiaozhi.console import register_console_routes
 from xiaozhi.session import DeviceSession
 
 
@@ -103,6 +104,7 @@ async def main(port_override: int | None = None) -> None:
     app.router.add_route("OPTIONS", "/xiaozhi/ota/", ota_options)
     app.router.add_get("/xiaozhi/v1/", websocket_handler)
     app.router.add_get("/xiaozhi/v1", websocket_handler)
+    register_console_routes(app)
 
     runner = web.AppRunner(app)
     await runner.setup()
@@ -131,6 +133,7 @@ async def main(port_override: int | None = None) -> None:
 
     lan = public_host(config)
     print(f"[server] ready on {lan}:{port}")
+    print(f"  Console:   http://{lan}:{port}/console/")
     print(f"  OTA:       http://{lan}:{port}/xiaozhi/ota/")
     print(f"  WebSocket: ws://{lan}:{port}/xiaozhi/v1/")
     print("  Press Ctrl+C to stop")

@@ -17,9 +17,21 @@ class TtsProvider:
             return await self._openai_tts(text)
         return await self._edge_tts(text)
 
+    def _edge_rate(self) -> str:
+        speed = int(self.config.get("speech_speed", 0))
+        speed = max(-50, min(50, speed))
+        return f"{speed:+d}%"
+
+    def _edge_pitch(self) -> str:
+        pitch = int(self.config.get("pitch", 0))
+        pitch = max(-50, min(50, pitch))
+        return f"{pitch:+d}Hz"
+
     async def _edge_tts(self, text: str) -> bytes:
         voice = self.config.get("voice", "en-US-JennyNeural")
-        communicate = edge_tts.Communicate(text, voice)
+        communicate = edge_tts.Communicate(
+            text, voice, rate=self._edge_rate(), pitch=self._edge_pitch()
+        )
         mp3 = io.BytesIO()
         async for chunk in communicate.stream():
             if chunk["type"] == "audio":

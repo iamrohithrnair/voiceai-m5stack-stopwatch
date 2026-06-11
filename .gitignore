@@ -20,3 +20,4 @@ mmap_generate_*.h
 .clangd
 server/.venv/
 server/config.yaml
+server/data/

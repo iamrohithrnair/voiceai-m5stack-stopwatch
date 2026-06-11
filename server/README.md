@@ -29,7 +29,15 @@ export OPENAI_API_KEY=sk-...   # or point llm/asr at Ollama / another OpenAI-com
 python app.py
 ```
 
-5. Flash the ESP32 firmware (local server mode is enabled by default in `sdkconfig.defaults`).
+5. Open the **local console** in your browser (same settings as xiaozhi.me):
+
+```
+http://<your-lan-ip>:8000/console/
+```
+
+Configure assistant name, system prompt, LLM model, voice, memory, and API keys from the UI.
+
+6. Flash the ESP32 firmware (local server mode is enabled by default in `sdkconfig.defaults`).
 
 Stop the server with **Ctrl+C**. If port 8000 is already in use, run `lsof -ti:8000 | xargs kill` or `python app.py --port 8001`.
 

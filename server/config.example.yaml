@@ -1,45 +1,50 @@
-# Copy to config.yaml and edit for your environment.
+# Copy to config.yaml and edit, or use http://<host>:8000/console/
 
 server:
   host: 0.0.0.0
   port: 8000
-  # Override auto-detected LAN IP when building OTA/websocket URLs
   # public_host: 192.168.1.100
   timezone_offset: 0
 
 assistant:
-  name: XiaoZhi
+  role_template: technical_mentor   # default | technical_mentor | custom
+  name: Angel
+  dialogue_language: en             # auto | en | zh | ja | ko | de | fr | es
   system_prompt: |
-    You are a helpful voice assistant on an ESP32 device. Keep replies short,
-    conversational, and easy to speak aloud. Respond in the same language the user uses.
+    You are a friendly Technical Mentor and Teacher.
+    (Edit in console — Role Introduction)
 
-# Speech-to-text
+memory:
+  type: rolling_summary   # none | session | rolling_summary
+  max_turns: 10           # session mode only
+
 asr:
-  provider: openai          # openai | local_whisper
+  provider: openai
   model: whisper-1
   api_key: ${OPENAI_API_KEY}
   base_url: https://api.openai.com/v1
-  # local_whisper only:
-  # model: base
-  # device: cpu             # cpu | cuda
 
-# Large language model (any OpenAI-compatible API, including Ollama)
 llm:
   provider: openai
   model: gpt-4o-mini
   api_key: ${OPENAI_API_KEY}
   base_url: https://api.openai.com/v1
-  # Ollama example:
-  # model: llama3.2
-  # api_key: ollama
-  # base_url: http://127.0.0.1:11434/v1
 
-# Text-to-speech
 tts:
-  provider: edge            # edge | openai
+  provider: edge
   voice: en-US-JennyNeural
-  # openai only:
-  # model: gpt-4o-mini-tts
-  # api_key: ${OPENAI_API_KEY}
-  # base_url: https://api.openai.com/v1
-  # voice: alloy
+  speech_speed: 0    # -50 to +50 (%)
+  pitch: 0           # -50 to +50 (Hz)
+
+mcp:
+  enabled: true
+  # Device-side MCP tools are exposed by the ESP32 firmware automatically.
+
+knowledge_base:
+  enabled: false
+  url: ""
+  # RAG integration: set URL to a compatible retrieval API (coming soon).
+
+voice_clone:
+  enabled: false
+  # Voice cloning requires an external service (not included in local server).

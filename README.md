@@ -108,7 +108,9 @@ Breadboard demo:
 
 For beginners, it is recommended to use the firmware that can be flashed without setting up a development environment.
 
-The firmware connects to the official [xiaozhi.me](https://xiaozhi.me) server by default. Personal users can register an account to use the Qwen real-time model for free.
+**This fork defaults to a self-hosted local server** — no [xiaozhi.me](https://xiaozhi.me) account required. See [Local Server Setup](docs/local-server.md) and [server/README.md](server/README.md) to run `server/app.py` on your PC and configure your own ASR/LLM/TTS models.
+
+To use the official cloud instead, disable **Use self-hosted local server** in `idf.py menuconfig`.
 
 👉 [Beginner's Firmware Flashing Guide](https://ccnphfhqs21z.feishu.cn/wiki/Zpz4wXBtdimBrLk25WdcXzxcnNS)
 
@@ -129,9 +131,9 @@ The firmware connects to the official [xiaozhi.me](https://xiaozhi.me) server by
 
 ## Large Model Configuration
 
-If you already have a XiaoZhi AI chatbot device and have connected to the official server, you can log in to the [xiaozhi.me](https://xiaozhi.me) console for configuration.
+Edit `server/config.yaml` to choose your ASR, LLM, and TTS providers (OpenAI, Ollama, Edge TTS, local Whisper, etc.). See [docs/local-server.md](docs/local-server.md).
 
-👉 [Backend Operation Video Tutorial (Old Interface)](https://www.bilibili.com/video/BV1jUCUY2EKM/)
+For the official cloud console instead, log in at [xiaozhi.me](https://xiaozhi.me).
 
 ## Related Open Source Projects
 

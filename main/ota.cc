@@ -44,12 +44,37 @@ Ota::~Ota() {
 }
 
 std::string Ota::GetCheckVersionUrl() {
+#if CONFIG_USE_LOCAL_SERVER
+    char url[160];
+    snprintf(url, sizeof(url), "http://%s:%d/xiaozhi/ota/", CONFIG_LOCAL_SERVER_HOST, CONFIG_LOCAL_SERVER_PORT);
+    return url;
+#else
     Settings settings("wifi", false);
     std::string url = settings.GetString("ota_url");
     if (url.empty()) {
         url = CONFIG_OTA_URL;
     }
     return url;
+#endif
+}
+
+void Ota::ApplyLocalServerConfig() {
+#if CONFIG_USE_LOCAL_SERVER
+    char ws_url[160];
+    snprintf(ws_url, sizeof(ws_url), "ws://%s:%d/xiaozhi/v1/", CONFIG_LOCAL_SERVER_HOST, CONFIG_LOCAL_SERVER_PORT);
+
+    Settings settings("websocket", true);
+    settings.SetString("url", ws_url);
+    settings.SetString("token", "");
+    settings.SetInt("version", 1);
+
+    has_websocket_config_ = true;
+    has_mqtt_config_ = false;
+    has_activation_code_ = false;
+    has_activation_challenge_ = false;
+
+    ESP_LOGI(TAG, "Using local server at %s", ws_url);
+#endif
 }
 
 std::unique_ptr<Http> Ota::SetupHttp() {

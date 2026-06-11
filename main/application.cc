@@ -400,6 +400,10 @@ void Application::CheckNewVersion() {
     int retry_count = 0;
     int retry_delay = 10; // Initial retry delay in seconds
 
+#if CONFIG_USE_LOCAL_SERVER
+    ota_->ApplyLocalServerConfig();
+#endif
+
     auto& board = Board::GetInstance();
     while (true) {
         auto display = board.GetDisplay();
@@ -407,6 +411,13 @@ void Application::CheckNewVersion() {
 
         esp_err_t err = ota_->CheckVersion();
         if (err != ESP_OK) {
+#if CONFIG_USE_LOCAL_SERVER
+            if (ota_->HasWebsocketConfig()) {
+                ESP_LOGW(TAG, "OTA check failed but local websocket config is available, continuing");
+                ota_->MarkCurrentVersionValid();
+                break;
+            }
+#endif
             retry_count++;
             if (retry_count >= MAX_RETRY) {
                 ESP_LOGE(TAG, "Too many retries, exit version check");
@@ -477,6 +488,9 @@ void Application::InitializeProtocol() {
 
     display->SetStatus(Lang::Strings::LOADING_PROTOCOL);
 
+#if CONFIG_USE_LOCAL_SERVER
+    protocol_ = std::make_unique<WebsocketProtocol>();
+#else
     if (ota_->HasMqttConfig()) {
         protocol_ = std::make_unique<MqttProtocol>();
     } else if (ota_->HasWebsocketConfig()) {
@@ -485,6 +499,7 @@ void Application::InitializeProtocol() {
         ESP_LOGW(TAG, "No protocol specified in the OTA config, using MQTT");
         protocol_ = std::make_unique<MqttProtocol>();
     }
+#endif
 
     protocol_->OnConnected([this]() {
         DismissAlert();

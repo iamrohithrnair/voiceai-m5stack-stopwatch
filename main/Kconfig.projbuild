@@ -1,10 +1,32 @@
 menu "Xiaozhi Assistant"
 
+config USE_LOCAL_SERVER
+    bool "Use self-hosted local server (no xiaozhi.me cloud)"
+    default y
+    help
+        Connect to the bundled local server in server/ instead of the official
+        xiaozhi.me cloud. No device activation code is required.
+
+config LOCAL_SERVER_HOST
+    string "Local server hostname or IP"
+    default "192.168.1.100"
+    depends on USE_LOCAL_SERVER
+    help
+        IP address or hostname of the machine running server/app.py.
+        Use your computer's LAN IP so the ESP32 can reach it.
+
+config LOCAL_SERVER_PORT
+    int "Local server port"
+    default 8000
+    depends on USE_LOCAL_SERVER
+
 config OTA_URL
     string "Default OTA URL"
+    default "http://192.168.1.100:8000/xiaozhi/ota/" if USE_LOCAL_SERVER
     default "https://api.tenclass.net/xiaozhi/ota/"
     help
         The application will access this URL to check for new firmwares and server address.
+        When local server mode is enabled, this defaults to your local OTA endpoint.
 
 choice
     prompt "Flash Assets"

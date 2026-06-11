@@ -1,0 +1,45 @@
+# Copy to config.yaml and edit for your environment.
+
+server:
+  host: 0.0.0.0
+  port: 8000
+  # Override auto-detected LAN IP when building OTA/websocket URLs
+  # public_host: 192.168.1.100
+  timezone_offset: 0
+
+assistant:
+  name: XiaoZhi
+  system_prompt: |
+    You are a helpful voice assistant on an ESP32 device. Keep replies short,
+    conversational, and easy to speak aloud. Respond in the same language the user uses.
+
+# Speech-to-text
+asr:
+  provider: openai          # openai | local_whisper
+  model: whisper-1
+  api_key: ${OPENAI_API_KEY}
+  base_url: https://api.openai.com/v1
+  # local_whisper only:
+  # model: base
+  # device: cpu             # cpu | cuda
+
+# Large language model (any OpenAI-compatible API, including Ollama)
+llm:
+  provider: openai
+  model: gpt-4o-mini
+  api_key: ${OPENAI_API_KEY}
+  base_url: https://api.openai.com/v1
+  # Ollama example:
+  # model: llama3.2
+  # api_key: ollama
+  # base_url: http://127.0.0.1:11434/v1
+
+# Text-to-speech
+tts:
+  provider: edge            # edge | openai
+  voice: en-US-JennyNeural
+  # openai only:
+  # model: gpt-4o-mini-tts
+  # api_key: ${OPENAI_API_KEY}
+  # base_url: https://api.openai.com/v1
+  # voice: alloy

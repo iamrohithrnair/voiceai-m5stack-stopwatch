@@ -13,6 +13,7 @@ public:
     ~Ota();
 
     esp_err_t CheckVersion();
+    void ApplyLocalServerConfig();
     esp_err_t Activate();
     bool HasActivationChallenge() { return has_activation_challenge_; }
     bool HasNewVersion() { return has_new_version_; }
